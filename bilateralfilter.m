@@ -1,22 +1,29 @@
 %Bilateral Filter for Smoothing an image. This is one of the steps to
-%cartoonizing an image.
+%cartoonizing an image. Here, we are using MathWorks recommended method of
+%bilater filtering using I - image to filter, degreeOfSmoothing (DoS), and
+%spatialSigma - standard feviation of spatial Gaussian smoothing kernel
 %-Leslie
 
 function B = bilateralfilter(I,sigma)
     
-    %specifying crop angle in matrix. Chose randomly- should we change?
-    patch = imcrop(I, [80, 50, 30, 30]);
-    imshow(patch);
+    %colorscale - test
+    I = imread('coloredCircles.png');
+    imshow(I);
     
-    %standard deviation of matrix
-    patchVar = std2(patch)^2;
+    imLAB = rgb2lab(I);
     
-    DegSmooth = 2*patchVar;
+    patch = imcrop(imLAB, [34, 71, 60, 55]);
+    patchSq = patch.^2;
+    eucdist = sqrt(sum(patchSq,3));
+    
+    patchVar = std2(eucdist)^2;
+    
+    DoS = 4*patchVar;
     %bilateral filtering with Gaussian
-    J = imbilatfilt(I,DegSmooth);
-    imshow(J);
-    title(['Degree of Smoothing: ',num2str(DegSmooth)]);
-    B = imbilatfilt(I, DegSmooth, sigma);
+    smoothed = imbilatfilt(imLAB,DoS,7);
+    smoothedColor = lab2rgb(smoothed,'Out','uint8');
+    montage({I,smoothedColor})
+    %B = imbilatfilt(I, DoS, sigma);
     
     
 end
